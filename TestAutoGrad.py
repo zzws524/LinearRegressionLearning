@@ -31,13 +31,6 @@ def SGD(params, alpha):
 w = nd.random_normal(shape=(1, 1))
 b = nd.zeros(shape=(1,1))
 
-#get result from manual grad for test:
-#b=nd.array([[0.51583]])
-#w=nd.array([[0.96992]])
-#diff=nd.dot(x,w)+b-y
-#diffT=(nd.dot(x,w)+b-y).T
-#print (error_function(x,y))
-
 params = [w, b]
 
 # 给系数列表的每个元素分配存放梯度的内存
@@ -46,14 +39,23 @@ for param in params:
 
 
 total_loss=0
+tmp_counter=0
 
-
-#while not np.all((np.absolute(params[0].asnumpy())))<1e-5:
-for i in range(0,50000):
+# 第一次微分，计算梯度
+with autograd.record():
+    total_loss=error_function(x,y)
+total_loss.backward()
+SGD(params, alpha)
+tmp_counter+=1
+# 迭代，直至梯度小于1e-5
+while nd.min(params[0].grad.abs()>1e-5) or nd.min(params[1].grad.abs()>1e-5):
     with autograd.record():
         total_loss=error_function(x,y)
     total_loss.backward()
     SGD(params, alpha)
+    tmp_counter+=1
 
+
+print(tmp_counter)
 print(total_loss)
 print(params)
